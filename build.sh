@@ -1,1 +1,1 @@
-gcc `pkg-config --cflags gtk+-3.0` -o example-glade main.c `pkg-config --libs gtk+-3.0` -rdynamic
+gcc `pkg-config --cflags gtk+-3.0` -o labo4-gtk main.c `pkg-config --libs gtk+-3.0 ` -rdynamic
