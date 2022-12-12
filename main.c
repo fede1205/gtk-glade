@@ -183,7 +183,7 @@ void input_combo(GtkWidget *wid, gpointer ptr)
   char Pin1State[50];
     if (GPIO_READ(sel))
     {
-        sprintf(Pin1State, "Input GPIO %d high", sel);
+        sprintf(Pin1State, "Input GPIO %d: high", sel);
     }
     else
     {
