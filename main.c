@@ -9,6 +9,8 @@
 struct bcm2835_peripheral gpio = {GPIO_BASE};
 struct bcm2835_peripheral bsc0 = {BSC0_BASE};
 
+gpointer lblptr;
+
 int map_peripheral(struct bcm2835_peripheral *p)
 {
     if ((p->mem_fd = open("/dev/mem", O_RDWR | O_SYNC)) < 0)
@@ -158,10 +160,41 @@ else {
 void combo_changed (GtkWidget *wid, gpointer ptr)
 {
   int sel = gtk_combo_box_get_active (GTK_COMBO_BOX (wid));
-  char *selected = gtk_combo_box_text_get_active_text (
-      GTK_COMBO_BOX_TEXT (wid));
+  int gpio_pin = sel;
+  // read seected pin
+  char Pin1State[50];
+    if (GPIO_READ(gpio_pin))
+    {
+        sprintf(Pin1State, "Input GPIO %d high", gpio_pin);
+    }
+    else
+    {
+        sprintf(Pin1State, "Input GPIO %d: low", gpio_pin);
+    }
+    gtk_label_set_text(GTK_LABEL(lblptr), Pin1State);
+
+  char *selected = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (wid));
   printf ("The value of the combo is %d %s\n", sel, selected);
 }
+
+void input_combo(GtkWidget *wid, gpointer ptr)
+{
+  int sel = gtk_combo_box_get_active (GTK_COMBO_BOX (ptr));
+  char Pin1State[50];
+    if (GPIO_READ(sel))
+    {
+        sprintf(Pin1State, "Input GPIO %d high", sel);
+    }
+    else
+    {
+        sprintf(Pin1State, "Input GPIO %d: low", sel);
+    }
+    gtk_label_set_text(GTK_LABEL(lblptr), Pin1State);
+  char *selected = gtk_combo_box_text_get_active_text (GTK_COMBO_BOX_TEXT (wid));
+  printf ("The value of the combo is %d %s\n", sel, selected);
+}
+
+
 
 void main(int argc, char *argv[])
 {
@@ -179,19 +212,23 @@ void main(int argc, char *argv[])
     g_signal_connect(win, "delete_event", G_CALLBACK(end_program), NULL);
     GtkWidget *lbl1 = gtk_label_new("Input GPIO 17:");
     GtkWidget *lbl2 = gtk_label_new("Input GPIO 22:");
+    GtkWidget *lbl3 = gtk_label_new("Input selected:");
+    lblptr = lbl3;
     GtkWidget *btn1 = gtk_button_new_with_label("Controleer status van GPIO 17");
     GtkWidget *btn2 = gtk_button_new_with_label("Controleer status van GPIO 22");
+    GtkWidget *btn3 = gtk_button_new_with_label("controleer status selected");
     GtkWidget *chk1 = gtk_check_button_new_with_label("Output gpio 26");
     GtkWidget *chk2 = gtk_check_button_new_with_label("Output gpio 20");
     GtkWidget *comb = gtk_combo_box_text_new();
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comb),"gpio 3");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comb),"gpio 4");
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comb),"gpio 5");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comb),"gpio 0");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comb),"gpio 1");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comb),"gpio 2");
     g_signal_connect(btn1, "clicked", G_CALLBACK(input1), lbl1);
     g_signal_connect(btn2, "clicked", G_CALLBACK(input2), lbl2);
     g_signal_connect(chk1, "toggled", G_CALLBACK(output1), NULL);
     g_signal_connect(chk2, "toggled", G_CALLBACK(output2), NULL);
-    g_signal_connect (comb, "changed", G_CALLBACK (combo_changed), NULL);
+    //g_signal_connect (comb, "changed", G_CALLBACK (combo_changed), NULL);
+    g_signal_connect(btn3, "clicked", G_CALLBACK(input_combo), comb);
     GtkWidget *box = gtk_vbox_new(FALSE, 5);
     gtk_box_pack_start(GTK_BOX(box), btn1, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box), lbl1, TRUE, TRUE, 0);
@@ -200,6 +237,8 @@ void main(int argc, char *argv[])
     gtk_box_pack_start(GTK_BOX(box), chk1, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box), chk2, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box), comb, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), btn3, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), lbl3, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(box), btn, TRUE, TRUE, 0);
     gtk_container_add(GTK_CONTAINER(win), box);
     gtk_widget_show_all(win);
